@@ -10,7 +10,6 @@ export default async function Home({
   const results = q ? await searchPodcasts(q) : null;
   return (
     <main className="min-h-screen flex flex-col gap-4 items-center justify-center px-2">
-      <div className="absolute -top-20 right-1/4 h-96 w-96 rounded-full bg-linear-to-r from-teal-700 to-cyan-700 blur-[120px] opacity-30 animate-pulse [animation-duration:8s]"></div>
       <h1 className="text-6xl text-center font-semibold">📺 Blogcaster</h1>
       <form
         action={handleSearchPodcast}
