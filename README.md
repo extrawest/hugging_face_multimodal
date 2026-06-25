@@ -48,6 +48,10 @@ graph TD
 - **Audio Synthesis**: ElevenLabs (`elevenlabs-js`)
 - **Podcast Database**: Podcast Index API (`podcastdx-client`)
 
+## Video demonstration
+
+https://github.com/user-attachments/assets/b0196089-a558-4001-bafe-e53be529d851
+
 ## Running On Local Machine
 
 ### 1. Configure Environment Variables
