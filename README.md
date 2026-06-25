@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Blogcaster - AI-Powered Podcast to Blog SaaS App
 
-## Getting Started
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)]()
+[![Maintainer](https://img.shields.io/static/v1?label=Ilya%20Devder&message=Maintainer&color=red)](mailto:ilya.devder@extrawest.com)
+[![Ask Me Anything !](https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg)]()
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+![GitHub release](https://img.shields.io/badge/release-v1.0.0-blue)
 
-First, run the development server:
+An AI-powered podcast discovery and content generation platform built with Next.js 16, React 19, and Tailwind CSS. The application leverages Hugging Face Inference API and ElevenLabs to automatically transcribe podcast episodes, generate catchy SEO-friendly blog posts, produce stunning AI-generated hero images, translate summaries, generate audio voiceovers, and allow users to chat with the podcast content.
+
+---
+
+## 🎙️ Core Workflow & Pipeline
+
+Here is how Blogcaster processes podcast audio into complete blog experiences:
+
+```mermaid
+graph TD
+    A[Search Podcast] -->|Podcast Index API| B[Select Episode]
+    B -->|Audio Stream| C[Speech-to-Text: openai/whisper-large-v3]
+    C -->|Raw Transcription| D[Summarization: facebook/bart-large-cnn]
+    D -->|Executive Summary| E[Generate Title & Prompt: meta-llama/Llama-3.1-8B-Instruct]
+    E -->|Catchy Blog Title| F[Text-to-Image: stabilityai/stable-diffusion-xl-base-1.0]
+    F -->|Hero Image| G[Blog Post Preview]
+    D -->|Summary Options| H[Translation: Helsinki-NLP/opus-mt-en-fr]
+    D -->|Summary Options| I[Text-to-Speech: ElevenLabs Client]
+    C -->|Interactive Q&A| J[Llama 3.1 Q&A Chatbot]
+```
+
+## Key Features
+
+- **Semantic Podcast Discovery**: Instant podcast search powered by the Podcast Index API.
+- **AI Speech-to-Text Pipeline**: High-accuracy automatic speech recognition using `openai/whisper-large-v3`.
+- **Automated Summarization & SEO**: Generates executive summaries using `facebook/bart-large-cnn` and crafts catchy titles with `meta-llama/Llama-3.1-8B-Instruct`.
+- **Text-to-Image Hero Generation**: Automatically designs custom, high-quality blog hero graphics using `stabilityai/stable-diffusion-xl-base-1.0`.
+- **Multi-lingual Translation**: Seamlessly translates generated blog summaries from English to French using `Helsinki-NLP/opus-mt-en-fr`.
+- **High-Fidelity Text-to-Speech**: Generates natural, lifelike audio voiceovers of summaries via ElevenLabs.
+- **Interactive Podcast Q&A Chatbot**: A custom LLM assistant allowing users to ask questions and get instant answers anchored to the podcast transcript context.
+
+## Tech Stack
+
+- **Framework**: Next.js 16 & React 19
+- **Styling**: Tailwind CSS & DaisyUI
+- **Speech Recognition**: Whisper Large v3 (`openai/whisper-large-v3` via Hugging Face)
+- **Language Models**: Llama 3.1 8B Instruct & BART Large CNN (`meta-llama/Llama-3.1-8B-Instruct`, `facebook/bart-large-cnn` via Hugging Face)
+- **Image Generation**: Stable Diffusion XL (`stabilityai/stable-diffusion-xl-base-1.0` via Hugging Face)
+- **Translation**: OPUS MT (`Helsinki-NLP/opus-mt-en-fr` via Hugging Face)
+- **Audio Synthesis**: ElevenLabs (`elevenlabs-js`)
+- **Podcast Database**: Podcast Index API (`podcastdx-client`)
+
+## Running On Local Machine
+
+### 1. Configure Environment Variables
+
+Create a `.env` file in the root directory and add the following API credentials:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+PODCAST_INDEX_API_KEY="your_podcast_index_key"
+PODCAST_INDEX_API_SECRET="your_podcast_index_secret"
+HF_TOKEN="your_hugging_face_token"
+ELEVENLABS_API_KEY="your_elevenlabs_api_key"
+ELEVENLABS_VOICE_ID="optional_voice_id"
+```
+
+### 2. Install Dependencies
+
+Using Bun (recommended):
+
+```bash
+bun install
+```
+
+Or using npm:
+
+```bash
+npm install
+```
+
+### 3. Launch Development Server
+
+Using Bun:
+
+```bash
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Or using npm:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
 
-## Learn More
+## Branches
 
-To learn more about Next.js, take a look at the following resources:
+- `main`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Contributing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Feel free to open issues or submit pull requests to improve the project. Contributions are welcome!
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Developed by [extrawest](https://extrawest.com/). Software development company
