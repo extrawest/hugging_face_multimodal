@@ -1,65 +1,68 @@
-import Image from "next/image";
+import { handleSearchPodcast, searchPodcasts } from "@/api/podcast.api";
+import Link from "next/link";
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+  const results = q ? await searchPodcasts(q) : null;
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="min-h-screen flex flex-col gap-4 items-center justify-center px-2">
+      <div className="absolute -top-20 right-1/4 h-96 w-96 rounded-full bg-linear-to-r from-teal-700 to-cyan-700 blur-[120px] opacity-30 animate-pulse [animation-duration:8s]"></div>
+      <h1 className="text-6xl text-center font-semibold">📺 Blogcaster</h1>
+      <form
+        action={handleSearchPodcast}
+        className="w-full flex items-center justify-center"
+      >
+        <input
+          placeholder="Search for a podcast..."
+          type="text"
+          name="q"
+          defaultValue={q || ""}
+          className="input border-r-0 rounded-r-none outline-0 w-96"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+        <button type="submit" className="btn btn-accent rounded-l-none">
+          Search
+        </button>
+      </form>
+
+      {results && (
+        <div className="flex flex-wrap gap-4 justify-center max-w-4xl">
+          {results.feeds.length === 0 && <p>No podcasts found for “{q}”.</p>}
+          {results.feeds.map((feed) => (
+            <Link
+              key={feed.id}
+              href={`/episodes?feedId=${feed.id}`}
+              className="card-border card card-body bg-white/10 hover:bg-white/20 cursor-pointer w-fit max-w-xs"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              <h2 className="card-title">{feed.title}</h2>
+              <p className="line-clamp-2 text-sm opacity-80">
+                {feed.author}
+              </p>
+            </Link>
+          ))}
+        </div>
+      )}
+      {/*{selectedEpisode && (
+        <div className="flex flex-col items-center gap-4">
+          <h1 className="text-5xl text-center">{selectedEpisode.title}</h1>
+          <p>{selectedEpisode.description.replace(/<[^>]*>/g, "")}</p>
+          <audio controls>
+            <source src={selectedEpisode.enclosureUrl} type="audio/mpeg" />
+          </audio>
+          {transcription && (
+            <Suspense
+              fallback={
+                <div className="skeleton-text w-screen h-12 bg-red-500" />
+              }
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              <AudioTranscribe transcription={transcription} />
+            </Suspense>
+          )}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      )}*/}
+    </main>
   );
 }
