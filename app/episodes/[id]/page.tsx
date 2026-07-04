@@ -1,6 +1,7 @@
+import { transcribePodcastAudio } from "@/api/ai.graph";
 import { getEpisodeById } from "@/api/podcast.api";
-import { speechRecognition } from "@/api/hugging-face.api";
 import AudioTranscribe from "@/components/audioTranscribe";
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ArrowLeft, Clock, Play } from "lucide-react";
@@ -13,8 +14,7 @@ export default async function EpisodePage({
   const { id } = await params;
   const { episode } = await getEpisodeById(Number(id));
 
-  // Starts the Whisper Speech-to-Text Promise asynchronously
-  const transcription = speechRecognition(episode.enclosureUrl);
+  const transcription = transcribePodcastAudio(episode.enclosureUrl);
 
   return (
     <main className="min-h-screen relative overflow-hidden bg-slate-950 text-white pb-16">
@@ -28,9 +28,12 @@ export default async function EpisodePage({
 
         <div className="flex flex-col md:flex-row gap-8 items-center bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 backdrop-blur-xl shadow-2xl mb-8">
           {episode.image && (
-            <img
+            <Image
               src={episode.image}
               alt={episode.title}
+              width={192}
+              height={192}
+              unoptimized
               className="w-32 h-32 md:w-48 md:h-48 object-cover rounded-2xl border border-white/10 shadow-lg"
             />
           )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { chatWithModel } from "@/api/hugging-face.api";
+import { answerPodcastQuestion } from "@/api/ai.graph";
 import { Send, Bot, User, Loader2 } from "lucide-react";
 
 export default function Qna({
@@ -31,7 +31,7 @@ export default function Qna({
 
     try {
       const chatHistory = [...messages, userMsg];
-      const aiResponse = await chatWithModel(chatHistory, transcriptionText);
+      const aiResponse = await answerPodcastQuestion(chatHistory, transcriptionText);
       setMessages((prev) => [
         ...prev,
         {
@@ -59,7 +59,7 @@ export default function Qna({
         </h2>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[300px] max-h-[450px]">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-75 max-h-112.5">
         {messages.length === 0 ? (
           <div className="text-center py-8 opacity-50 text-sm">
             Ask any questions regarding the full original transcription.

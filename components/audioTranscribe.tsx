@@ -15,8 +15,7 @@ export default function AudioTranscribe({
   if (!text) {
     return (
       <div className="alert alert-error mt-4">
-        Speech recognition returned no text. Verify the audio file is accessible
-        and the Whisper model is responsive.
+        Speech recognition returned no text.
       </div>
     );
   }

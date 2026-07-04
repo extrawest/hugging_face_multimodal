@@ -1,12 +1,15 @@
 "use server";
 import fs from "fs";
 import path from "path";
-import { Readable } from "stream";
-import { finished } from "stream/promises";
+
 import { InferenceClient } from "@huggingface/inference";
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
 const client = new InferenceClient(process.env.HF_TOKEN);
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  return error instanceof Error ? error.message : fallback;
+};
 
 export const speechRecognition = async (audioUrl: string) => {
   const dirPath = path.join(process.cwd(), "tmp");
@@ -28,23 +31,18 @@ export const speechRecognition = async (audioUrl: string) => {
 
     if (!response.ok)
       throw new Error(`Failed to fetch MP3: ${response.statusText}`);
-    if (!response.body) throw new Error("Response body is empty");
+    const data = Buffer.from(await response.arrayBuffer());
+    fs.writeFileSync(destinationPath, data);
 
-    const fileStream = fs.createWriteStream(destinationPath);
-    const nodeReadableStream = Readable.fromWeb(response.body as any);
-    nodeReadableStream.pipe(fileStream);
-    await finished(fileStream);
-
-    const data = fs.readFileSync(destinationPath);
     const blob = new Blob([data], { type: "audio/mpeg" });
 
     return await client.automaticSpeechRecognition({
       data: blob,
       model: "openai/whisper-large-v3",
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Transcription Error:", error);
-    throw new Error(error?.message ?? "Transcription failed");
+    throw new Error(getErrorMessage(error, "Transcription failed"));
   }
 };
 
@@ -55,9 +53,9 @@ export const summarizeText = async (text: string): Promise<string> => {
       inputs: text,
     });
     return result.summary_text || "";
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Summarization Error:", error);
-    throw new Error("Summarization failed");
+    throw new Error(getErrorMessage(error, "Summarization failed"));
   }
 };
 
@@ -145,7 +143,7 @@ export const generateSpeech = async (text: string): Promise<string> => {
     throw new Error("ELEVENLABS_API_KEY is not configured in the environment");
   }
 
-  const voiceId = process.env.ELEVENLABS_VOICE_ID || "EXAVITQu4vr4xnSDxMaL"; // Sarah - Mature, Reassuring, Confident (premade free voice)
+  const voiceId = process.env.ELEVENLABS_VOICE_ID || "EXAVITQu4vr4xnSDxMaL";
 
   try {
     const client = new ElevenLabsClient({ apiKey });

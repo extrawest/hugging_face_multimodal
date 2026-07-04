@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { translateToFrench } from "@/api/hugging-face.api";
+import { translateSummaryToFrench } from "@/api/ai.graph";
 import { Globe, Loader2 } from "lucide-react";
 
 export default function Translation({ englishText }: { englishText: string }) {
@@ -22,7 +22,7 @@ export default function Translation({ englishText }: { englishText: string }) {
 
     try {
       setLoading(true);
-      const res = await translateToFrench(englishText);
+      const res = await translateSummaryToFrench(englishText);
       setTranslatedText(res);
       setIsFrench(true);
     } catch (err) {
