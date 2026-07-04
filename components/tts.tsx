@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { generateSpeech } from "@/api/hugging-face.api";
+import { generateAudioSummary } from "@/api/ai.graph";
 import { Play, Square, Loader2 } from "lucide-react";
 
 export default function Tts({ summaryText }: { summaryText: string }) {
@@ -24,7 +24,7 @@ export default function Tts({ summaryText }: { summaryText: string }) {
 
     try {
       setLoading(true);
-      const base64Audio = await generateSpeech(summaryText);
+      const base64Audio = await generateAudioSummary(summaryText);
       setAudioUrl(base64Audio);
       
       const newAudio = new Audio(base64Audio);

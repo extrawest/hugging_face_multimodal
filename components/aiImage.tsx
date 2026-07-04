@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
-import { generateImage } from "@/api/hugging-face.api";
+import { generateHeroImageFromPrompt } from "@/api/ai.graph";
 
 export default function AiImage({ prompt }: { prompt: string }) {
   const [imageUrl, setImageUrl] = useState<string>("");
@@ -12,7 +13,7 @@ export default function AiImage({ prompt }: { prompt: string }) {
     async function fetchImage() {
       try {
         setLoading(true);
-        const dataUrl = await generateImage(prompt);
+        const dataUrl = await generateHeroImageFromPrompt(prompt);
         setImageUrl(dataUrl);
       } catch (err) {
         console.error(err);
@@ -47,10 +48,13 @@ export default function AiImage({ prompt }: { prompt: string }) {
 
   return (
     <div className="relative group overflow-hidden rounded-2xl border border-white/10 shadow-2xl h-64">
-      <img
+      <Image
         src={imageUrl}
         alt="AI Generated Blog Art"
-        className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105"
+        fill
+        unoptimized
+        sizes="(min-width: 768px) 50vw, 100vw"
+        className="object-cover transform transition-transform duration-700 group-hover:scale-105"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
         <p className="text-xs text-white/80 line-clamp-2">{prompt}</p>
