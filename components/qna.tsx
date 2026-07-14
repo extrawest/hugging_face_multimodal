@@ -1,20 +1,46 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { answerPodcastQuestion } from "@/api/ai.graph";
 import { Send, Bot, User, Loader2 } from "lucide-react";
 
 export default function Qna({
   transcriptionText,
+  episodeId,
 }: {
   transcriptionText: string;
+  episodeId: number;
 }) {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<
     { role: "user" | "assistant"; content: string }[]
   >([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(true);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    async function loadHistory() {
+      try {
+        setLoadingHistory(true);
+        const res = await fetch(`/api/chat?threadId=${episodeId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.messages && data.messages.length > 0) {
+            // Filter out system prompts if stored in history
+            const filteredMessages = data.messages.filter(
+              (msg: any) => msg.role === "user" || msg.role === "assistant",
+            );
+            setMessages(filteredMessages);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load chat history:", err);
+      } finally {
+        setLoadingHistory(false);
+      }
+    }
+    loadHistory();
+  }, [episodeId]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -30,21 +56,78 @@ export default function Qna({
     setIsLoading(true);
 
     try {
-      const chatHistory = [...messages, userMsg];
-      const aiResponse = await answerPodcastQuestion(chatHistory, transcriptionText);
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: userMsg,
+          transcriptionText,
+          threadId: String(episodeId),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to send message: ${response.statusText}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("Response body is not readable");
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let assistantContent = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          const data = JSON.parse(line);
+
+          if (data.error) {
+            throw new Error(data.error);
+          }
+
+          if (data.output && data.node === "answerPodcastQuestion") {
+            const msgs = data.output.messages;
+            if (msgs && msgs.length > 0) {
+              const lastMsg = msgs[msgs.length - 1];
+              if (lastMsg && lastMsg.role === "assistant") {
+                assistantContent = lastMsg.content;
+              }
+            }
+          }
+        }
+      }
+
+      if (!assistantContent) {
+        throw new Error("No response content from model");
+      }
+
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content:
-            aiResponse.content || "Sorry, I could not generate a response.",
+          content: assistantContent,
         },
       ]);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Error communicating with AI model." },
+        {
+          role: "assistant",
+          content: err.message || "Error communicating with AI model.",
+        },
       ]);
     } finally {
       setIsLoading(false);
@@ -60,7 +143,11 @@ export default function Qna({
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-75 max-h-112.5">
-        {messages.length === 0 ? (
+        {loadingHistory ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-accent" />
+          </div>
+        ) : messages.length === 0 ? (
           <div className="text-center py-8 opacity-50 text-sm">
             Ask any questions regarding the full original transcription.
           </div>
@@ -120,12 +207,12 @@ export default function Qna({
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="Ask about details..."
-          disabled={isLoading}
+          disabled={isLoading || loadingHistory}
           className="input input-bordered flex-1 bg-white/5 border-white/10 text-white rounded-xl placeholder:text-white/30 focus:outline-accent"
         />
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || loadingHistory}
           className="btn btn-accent btn-square rounded-xl"
         >
           <Send className="h-4 w-4" />

@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { generateAudioSummary } from "@/api/ai.graph";
 import { Play, Square, Loader2 } from "lucide-react";
 
-export default function Tts({ summaryText }: { summaryText: string }) {
+export default function Tts({ episodeId }: { episodeId: number }) {
   const [audioUrl, setAudioUrl] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -24,17 +23,74 @@ export default function Tts({ summaryText }: { summaryText: string }) {
 
     try {
       setLoading(true);
-      const base64Audio = await generateAudioSummary(summaryText);
-      setAudioUrl(base64Audio);
-      
-      const newAudio = new Audio(base64Audio);
+
+      const response = await fetch("/api/blog", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          threadId: String(episodeId),
+          action: "audio",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`TTS failed: ${response.statusText}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("Response body is not readable");
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let finalAudioUrl = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          const data = JSON.parse(line);
+
+          if (data.error) {
+            throw new Error(data.error);
+          }
+
+          if (
+            data.output &&
+            data.node === "generateAudioSummary" &&
+            data.output.audioUrl
+          ) {
+            finalAudioUrl = data.output.audioUrl;
+          }
+        }
+      }
+
+      if (!finalAudioUrl) {
+        throw new Error("No speech audio returned from ElevenLabs");
+      }
+
+      setAudioUrl(finalAudioUrl);
+
+      const newAudio = new Audio(finalAudioUrl);
       newAudio.onended = () => setIsPlaying(false);
       setAudio(newAudio);
       newAudio.play();
       setIsPlaying(true);
-    } catch (err) {
+    } catch (err: any) {
       console.error("TTS play error:", err);
-      alert("TTS generation failed. Please check ELEVENLABS_API_KEY.");
+      alert(
+        err.message ||
+          "TTS generation failed. Please check ELEVENLABS_API_KEY.",
+      );
     } finally {
       setLoading(false);
     }

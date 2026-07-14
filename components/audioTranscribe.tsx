@@ -6,8 +6,10 @@ import Qna from "./qna";
 
 export default function AudioTranscribe({
   transcription,
+  episodeId,
 }: {
   transcription: Promise<AutomaticSpeechRecognitionOutput | null>;
+  episodeId: number;
 }) {
   const result = use(transcription);
   const text = result?.text || "";
@@ -35,11 +37,11 @@ export default function AudioTranscribe({
           </div>
         </div>
 
-        <SummarySection transcriptionText={text} />
+        <SummarySection transcriptionText={text} episodeId={episodeId} />
       </div>
 
       <div className="w-full lg:w-96 shrink-0 lg:sticky lg:top-4">
-        <Qna transcriptionText={text} />
+        <Qna transcriptionText={text} episodeId={episodeId} />
       </div>
     </div>
   );

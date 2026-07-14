@@ -2,6 +2,22 @@
   "name": "podcast-to-blog",
   "version": "0.1.0",
   "private": true,
+  "description": "An AI-powered podcast discovery and content generation SaaS platform built with Next.js 16, React 19, LangGraph, Hugging Face, and ElevenLabs.",
+  "keywords": [
+    "nextjs",
+    "react",
+    "langgraph",
+    "ai-agent",
+    "huggingface",
+    "elevenlabs",
+    "podcast",
+    "transcription",
+    "text-to-speech",
+    "image-generation",
+    "translation",
+    "llm",
+    "saas"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -1,0 +1,71 @@
+import { NextResponse } from "next/server";
+import { podcastChatGraph } from "@/api/ai.graph";
+
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const threadId = searchParams.get("threadId");
+
+    if (!threadId) {
+      return NextResponse.json({ error: "threadId is required" }, { status: 400 });
+    }
+
+    const state = await podcastChatGraph.getState({ configurable: { thread_id: threadId } });
+    return NextResponse.json({ messages: state.values?.messages || [] });
+  } catch (err: any) {
+    console.error("Error in GET /api/chat:", err);
+    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    const { message, transcriptionText, threadId } = await req.json();
+
+    if (!threadId) {
+      return NextResponse.json({ error: "threadId is required" }, { status: 400 });
+    }
+    if (!message) {
+      return NextResponse.json({ error: "message is required" }, { status: 400 });
+    }
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          const eventStream = await podcastChatGraph.stream(
+            {
+              messages: [message],
+              transcriptionText,
+            },
+            { configurable: { thread_id: threadId } }
+          );
+
+          for await (const chunk of eventStream) {
+            const nodeName = Object.keys(chunk)[0];
+            const nodeOutput = (chunk as any)[nodeName];
+            
+            const payload = JSON.stringify({ node: nodeName, output: nodeOutput }) + "\n";
+            controller.enqueue(new TextEncoder().encode(payload));
+          }
+        } catch (err: any) {
+          console.error("Stream error in chat graph:", err);
+          const errorPayload = JSON.stringify({ error: err.message || "Failed during graph execution" }) + "\n";
+          controller.enqueue(new TextEncoder().encode(errorPayload));
+        } finally {
+          controller.close();
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+      },
+    });
+  } catch (err: any) {
+    console.error("Error in /api/chat route:", err);
+    return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
+  }
+}

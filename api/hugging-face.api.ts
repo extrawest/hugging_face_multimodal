@@ -7,10 +7,6 @@ import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
 const client = new InferenceClient(process.env.HF_TOKEN);
 
-const getErrorMessage = (error: unknown, fallback: string) => {
-  return error instanceof Error ? error.message : fallback;
-};
-
 export const speechRecognition = async (audioUrl: string) => {
   const dirPath = path.join(process.cwd(), "tmp");
   try {
@@ -42,7 +38,7 @@ export const speechRecognition = async (audioUrl: string) => {
     });
   } catch (error: unknown) {
     console.error("Transcription Error:", error);
-    throw new Error(getErrorMessage(error, "Transcription failed"));
+    throw error;
   }
 };
 
@@ -55,7 +51,7 @@ export const summarizeText = async (text: string): Promise<string> => {
     return result.summary_text || "";
   } catch (error: unknown) {
     console.error("Summarization Error:", error);
-    throw new Error(getErrorMessage(error, "Summarization failed"));
+    throw error;
   }
 };
 
@@ -95,11 +91,7 @@ Summary: ${summary}
     };
   } catch (error) {
     console.error("Title/Prompt Generation Error:", error);
-    return {
-      title: "Podcast Summary Blog Post",
-      imagePrompt:
-        "A sleek workspace with a podcast microphone, digital blog graphics, vibrant ambient lighting, 3d render",
-    };
+    throw error;
   }
 };
 
@@ -120,7 +112,7 @@ export const generateImage = async (prompt: string): Promise<string> => {
     return `data:image/png;base64,${buffer.toString("base64")}`;
   } catch (error) {
     console.error("Image Generation Error:", error);
-    throw new Error("Image generation failed");
+    throw error;
   }
 };
 
@@ -133,7 +125,7 @@ export const translateToFrench = async (text: string): Promise<string> => {
     return response.translation_text || "";
   } catch (error) {
     console.error("Translation Error:", error);
-    throw new Error("Translation failed");
+    throw error;
   }
 };
 
@@ -167,7 +159,7 @@ export const generateSpeech = async (text: string): Promise<string> => {
     return `data:audio/mpeg;base64,${buffer.toString("base64")}`;
   } catch (error) {
     console.error("TTS Error:", error);
-    throw new Error("Text-to-speech generation failed");
+    throw error;
   }
 };
 
@@ -195,10 +187,6 @@ export const chatWithModel = async (
     return response.choices[0].message;
   } catch (error) {
     console.error("Chat Error:", error);
-    return {
-      role: "assistant" as const,
-      content:
-        "I encountered an issue processing your chat request. Please try again.",
-    };
+    throw error;
   }
 };
