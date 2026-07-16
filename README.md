@@ -6,7 +6,19 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 ![GitHub release](https://img.shields.io/badge/release-v1.0.0-blue)
 
-An AI-powered podcast discovery and content generation platform built with Next.js 16, React 19, and Tailwind CSS. The application leverages Hugging Face Inference API and ElevenLabs to automatically transcribe podcast episodes, generate catchy SEO-friendly blog posts, produce stunning AI-generated hero images, translate summaries, generate audio voiceovers, and allow users to chat with the podcast content.
+## 📖 About
+
+**Blogcaster** is an AI-powered podcast discovery and content generation platform built with Next.js 16, React 19, and Tailwind CSS. The application leverages Hugging Face Inference API and ElevenLabs to automatically transcribe podcast episodes, generate catchy SEO-friendly blog posts, produce stunning AI-generated hero images, translate summaries, generate audio voiceovers, and allow users to chat with the podcast content.
+
+### 🏷️ Topics & Tags
+
+![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=nextdotjs)
+![React](https://img.shields.io/badge/React-19-20232A?style=flat-square&logo=react&logoColor=61DAFB)
+![LangGraph](https://img.shields.io/badge/LangGraph-Orchestration-orange?style=flat-square)
+![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97_Hugging_Face-Models-yellow?style=flat-square)
+![ElevenLabs](https://img.shields.io/badge/ElevenLabs-TTS-blueviolet?style=flat-square)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=flat-square&logo=tailwindcss&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-v5-007ACC?style=flat-square&logo=typescript&logoColor=white)
 
 ---
 

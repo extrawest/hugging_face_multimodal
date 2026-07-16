@@ -76,7 +76,7 @@ export default async function EpisodePage({
               </div>
             }
           >
-            <AudioTranscribe transcription={transcription} />
+            <AudioTranscribe transcription={transcription} episodeId={episode.id} />
           </Suspense>
         </div>
       </div>
